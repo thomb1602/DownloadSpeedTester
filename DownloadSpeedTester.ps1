@@ -7,9 +7,11 @@ $MinimumUploadSpeed = 20 #What is the minimum expected upload speed in Mbit/ps
 $speedtestPath = "C:\Program Files (x86)\Ookla\speedtest.exe"
 $resultsFile = "results.txt"
 
-$PreviousResults = if (Test-Path $resultsFile) { Get-Content $resultsFile| ConvertFrom-Csv }
+$PreviousResults = if (Test-Path $resultsFile) { Get-Content $resultsFile | ConvertFrom-Csv }
 
-#$SpeedtestResults = & "$($speedtestPath)\speedtest.exe" /format="csv" /output="-header"
-$SpeedtestResults = Start-Process -NoNewWindow -Wait -FilePath $speedtestPath -ArgumentList "--format=csv","--output-header" 
+[string]$SpeedtestResults # can't get results into this variable
+$resultsJob = Start-Job -Name "speedtestjob" -ScriptBlock { $SpeedtestResults = Start-Process -NoNewWindow -FilePath $speedtestPath -ArgumentList "--format=csv", "--output-header" }
 
-$SpeedtestResults | Format-Table
+Receive-Job -Name "speedtestjob"
+
+$SpeedtestResults | Write-Host
