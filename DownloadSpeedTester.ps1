@@ -1,15 +1,14 @@
-######### Absolute monitoring values ########## 
-$maxpacketloss = 2 #how much % packetloss until we alert. 
-$MinimumDownloadSpeed = 100 #What is the minimum expected download speed in Mbit/ps
-$MinimumUploadSpeed = 20 #What is the minimum expected upload speed in Mbit/ps
-######### End absolute monitoring values ######
- 
-$speedtestPath = "C:\Program Files (x86)\Ookla\speedtest.exe"
-$resultsFile = "results.txt"
+# Note that SpeedTest source must have been created with new-EventLog, or logging will fail
+# Note that speedtest.exe must be at the same location as this file
+# Output.exe is assumed to already have header information, including date as first field
 
-$PreviousResults = if (Test-Path $resultsFile) { Get-Content $resultsFile| ConvertFrom-Csv }
+Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest starting"
 
-#$SpeedtestResults = & "$($speedtestPath)\speedtest.exe" /format="csv" /output="-header"
-$SpeedtestResults = Start-Process -NoNewWindow -Wait -FilePath $speedtestPath -ArgumentList "--format=csv","--output-header" 
+$resultsFile = "output.txt"
+$result = .\speedtest.exe -f csv
 
-$SpeedtestResults | Format-Table
+$date = Get-Date
+$dateWithFormat = "`"$date`","
+$datedResult = -join($dateWithFormat, $result)
+
+Add-Content -Path $resultsFile -Value $datedResult
