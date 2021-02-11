@@ -5,10 +5,27 @@
 Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest starting"
 
 $resultsFile = "output.txt"
-$result = .\speedtest.exe -f csv
+
+try {
+    # this works if I run the file, but if task scheduler does it .\speedtest.exe isn't recognised
+    $result = speedtest.exe -f csv
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Executable executed"
+}
+catch {
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error performing speed test: $_"
+}
+
 
 $date = Get-Date
 $dateWithFormat = "`"$date`","
 $datedResult = -join($dateWithFormat, $result)
 
-Add-Content -Path $resultsFile -Value $datedResult
+try {
+    Add-Content -Path $resultsFile -Value $datedResult
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wrote to file"
+}
+catch {
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error writing to file: $_"
+}
+
+Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest complete"
