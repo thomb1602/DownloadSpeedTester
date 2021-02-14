@@ -1,30 +1,32 @@
-# Note that SpeedTest source must have been created with new-EventLog, or logging will fail
-# Note that speedtest.exe must be at the same location as this file
-# Output.exe is assumed to already have header information, including date as first field
-
-# speedtest.exe is available here: https://www.speedtest.net/apps/cli
-
 Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest starting"
 
-# without the full file path the file will be saved in system32 if thi script is run by Task Scheduler
-$resultsFile = "C:\Program Files (x86)\Ookla\output.txt"
-
+$resultsFile = "C:\Program Files (x86)\Ookla\useful_output.csv"
 try {
-    $result = speedtest.exe -f csv
+    # human readable format is harder to parse buthas more useful information than csv
+    $rawResult = speedtest.exe -f human-readable
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Executable executed"
 }
 catch {
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error performing speed test: $_"
 }
 
+# extract results to object
+$speedInMbPattern = '[0-9]*[0-9]\.[0-9][0-9]'
+$download = 0;
+$upload = 0
 $date = Get-Date
-$dateWithFormat = "`"$date`","
-$datedResult = -join($dateWithFormat, $result)
+$dateWithQuotes = "$date"
+if($rawResult[7] -match $speedInMbPattern) { $download = $Matches[0] }
+if($rawResult[9] -match $speedInMbPattern) { $upload = $Matches[0] }
+
+$result = "`"$dateWithQuotes`",`"$download`",`"$upload`""
 
 try {
-    Add-Content -Path $resultsFile -Value $datedResult
+    Add-Content -Path $resultsFile -Value $result
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wrote to file"
 }
 catch {
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error writing to file: $_"
 }
 
-Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest complete"
+Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest complete $datedResult"
