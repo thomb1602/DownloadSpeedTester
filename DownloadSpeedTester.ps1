@@ -1,6 +1,8 @@
 Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest starting"
 
 $resultsFile = "C:\Program Files (x86)\Ookla\useful_output.csv"
+$networkResultsFile = "C:\TRANSFER\speedtest_results.csv"
+
 try {
     # human readable format is harder to parse buthas more useful information than csv
     $rawResult = speedtest.exe -f human-readable
@@ -27,6 +29,14 @@ try {
 }
 catch {
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error writing to file: $_"
+}
+
+try {
+    Add-Content -Path $networkResultsFile -Value $result
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wrote to network file $networkResultsFile"
+}
+catch {
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error writing to local file: $_"
 }
 
 Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest complete $datedResult"
