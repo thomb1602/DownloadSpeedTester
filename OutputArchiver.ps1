@@ -9,6 +9,5 @@ Copy-Item -Path $resultsFile -Destination $newFilePath
 
 # empty file and re-add header
 $headerRow = Get-Content -Path $resultsFile -TotalCount 1
-
 Clear-Content -Path $resultsFile
 Add-Content -Path $resultsFile -Value $headerRow
