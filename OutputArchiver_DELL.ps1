@@ -1,22 +1,35 @@
-$resultsFile = "C:\Users\Tom\Desktop\speedtest\public\output.csv"
-$archivePath = "C:\Users\Tom\Desktop\speedtest\public\ResultsArchive\output_.csv"
-$indexFile = "C:\Users\Tom\Desktop\speedtest\public\ResultsArchive\index.txt";
+Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest starting"
 
-Write-EventLog -LogName Application -Source "SpeedtestArchiver" -EntryType Information -EventId 2 -Message "Archiver started"
-# copy output to archive
-$date = Get-Date -Format "yyyy-MM-ddTHHmmss"
-$newFilePath = $archivePath.Replace('_', $date)
-Copy-Item -Path $resultsFile -Destination $newFilePath 
-Write-EventLog -LogName Application -Source "SpeedtestArchiver" -EntryType Information -EventId 2 -Message "Copied to $newFilePath"
+$localResultsFile = "C:\Users\Tom\Desktop\speedtest\public\output.csv"
 
-# add filename to index.txt
-$newFileName = $newFilePath.Substring(53);
-Add-Content -Path $indexFile -Value $newFileName
+# do test
+try {
+    # human readable format is harder to parse but has more useful information than csv
+    $rawResult = speedtest.exe -f human-readable
+}
+catch {
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error performing speed test: $_"
+}
 
-# empty file and re-add header
-$headerRow = Get-Content -Path $resultsFile -TotalCount 1
+# extract results to string
+$speedInMbPattern = '[0-9]*[0-9]\.[0-9][0-9]'
+$download = 0;
+$upload = 0
+$date = Get-Date
+$dateWithQuotes = "$date"
+if($rawResult[7] -match $speedInMbPattern) { $download = $Matches[0] }
+if($rawResult[9] -match $speedInMbPattern) { $upload = $Matches[0] }
+$result = "`"$dateWithQuotes`",`"$download`",`"$upload`""
 
-Clear-Content -Path $resultsFile
-Add-Content -Path $resultsFile -Value $headerRow
 
-Write-EventLog -LogName Application -Source "SpeedtestArchiver" -EntryType Information -EventId 2 -Message "Empied output.csv"
+# write to output.csv
+try {
+    Add-Content -Path $localResultsFile -Value $result
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wrote to local file $localResultsFile"
+}
+catch {
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error writing to local file: $_"
+}
+
+
+Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Speedtest complete $datedResult"
