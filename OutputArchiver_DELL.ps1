@@ -2,13 +2,13 @@ Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -
 $ethernetResultsFile = "C:\Users\Tom\Desktop\speedtest\public\ethernet.csv"
 $wifiResultsFile = "C:\Users\Tom\Desktop\speedtest\public\wifi.csv"
 $ethernetName = "Ethernet";
-$wifiName = "Wifi";
+$wifiName = "Wifi 2";
 
+# ETHERNET TEST
 # ---------------------------------------------------------------------------
-
 # ensure ethernet
 if( (Get-NetAdapter -Name $ethernetName).Status -eq "Disabled"){
-    Disable-NetAdapter -Name $wifiName
+    Disable-NetAdapter -Name $wifiName -Confirm False
     Enable-NetAdapter -Name $ethernetName
     "Ethernet enabled, Wifi disabled"
   }
@@ -34,7 +34,7 @@ if($rawResult[9] -match $speedInMbPattern) { $upload = $Matches[0] }
 $result = "`"$dateWithQuotes`",`"$download`",`"$upload`""
 
 
-# write to output.csv
+# write to ethernet.csv
 try {
     Add-Content -Path $ethernetResultsFile -Value $result
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wrote speedtest to local file $ethernetResultsFile"
@@ -43,11 +43,12 @@ catch {
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error writing to local file: $_"
 }
 
-# ----------------------------------------------------------------------------------------
 
+# WIFI TEST
+# ----------------------------------------------------------------------------------------
 # ensure wifi
 if( (Get-NetAdapter -Name $wifiName).Status -eq "Disabled"){
-    Disable-NetAdapter -Name $ethernetName
+    Disable-NetAdapter -Name $ethernetName -Confirm False
     Enable-NetAdapter -Name $wifiName
     "Wifi enabled, Ethernet disabled"
   }
@@ -73,9 +74,9 @@ if($rawResult[9] -match $speedInMbPattern) { $upload = $Matches[0] }
 $result = "`"$dateWithQuotes`",`"$download`",`"$upload`""
 
 
-# write to output.csv
+# write to wifi.csv
 try {
-    Add-Content -Path $ethernetResultsFile -Value $result
+    Add-Content -Path $wifiResultsFile -Value $result
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wrote speedtest to local file $wifiResultsFile"
 }
 catch {
