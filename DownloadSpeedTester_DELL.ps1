@@ -8,10 +8,15 @@ $wifiName = "Wifi 2";
 # ---------------------------------------------------------------------------
 # ensure ethernet
 if( (Get-NetAdapter -Name $ethernetName).Status -eq "Disabled"){
-    Disable-NetAdapter -Name $wifiName -Confirm False
-    Enable-NetAdapter -Name $ethernetName
-    "Ethernet enabled, Wifi disabled"
-  }
+	try{
+		Disable-NetAdapter -Name $wifiName -$false
+		Enable-NetAdapter -Name $ethernetName
+		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Ethernet enabled, Wifi disabled"
+	}
+	catch{
+		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Unable to disable $wifiName and enable $ethernetName. Error: $_"
+	}       
+}
 
 # do test
 try {
@@ -48,16 +53,22 @@ catch {
 # ----------------------------------------------------------------------------------------
 # ensure wifi
 if( (Get-NetAdapter -Name $wifiName).Status -eq "Disabled"){
-    Disable-NetAdapter -Name $ethernetName -Confirm False
-    Enable-NetAdapter -Name $wifiName
-    "Wifi enabled, Ethernet disabled"
-  }
+	try{
+		Disable-NetAdapter -Name $ethernetName -Confirm $false
+		Enable-NetAdapter -Name $wifiName
+		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wifi enabled, Ethernet disabled"
+	}
+	catch{
+		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Unable to disable $ethernetName and enable $wifiName. Error: $_"
+	}	
+   
+ }
 
 # do test
 try {
     # human readable format is harder to parse but has more useful information than csv
-    $rawResult = speedtest.exe -f human-readable
-    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "$wifiName speedtest complete"
+    $rawResult = speedtest.exe -f human-readables
+    Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "$wifiName speedtest complete. Result: $rawResult"
 }
 catch {
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Error -EventId 2 -Message "Error performing $wifiName speed test: $_"
