@@ -9,8 +9,8 @@ $wifiName = "Wifi 2";
 # ensure ethernet
 if( (Get-NetAdapter -Name $ethernetName).Status -eq "Disabled"){
 	try{
-		Disable-NetAdapter -Name $wifiName -$false
-		Enable-NetAdapter -Name $ethernetName
+		Disable-NetAdapter -Name $wifiName -Confirm $false
+		Enable-NetAdapter -Name $ethernetName -Confirm $false
 		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Ethernet enabled, Wifi disabled"
 	}
 	catch{
@@ -55,7 +55,7 @@ catch {
 if( (Get-NetAdapter -Name $wifiName).Status -eq "Disabled"){
 	try{
 		Disable-NetAdapter -Name $ethernetName -Confirm $false
-		Enable-NetAdapter -Name $wifiName
+		Enable-NetAdapter -Name $wifiName -Confirm $false
 		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wifi enabled, Ethernet disabled"
 	}
 	catch{
