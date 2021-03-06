@@ -9,8 +9,8 @@ $wifiName = "Wifi 2";
 # ensure ethernet
 if( (Get-NetAdapter -Name $ethernetName).Status -eq "Disabled"){
 	try{
-		Disable-NetAdapter -Name $wifiName -Confirm $false
-		Enable-NetAdapter -Name $ethernetName -Confirm $false
+		Disable-NetAdapter -Name $wifiName -Confirm:$false
+		Enable-NetAdapter -Name $ethernetName -Confirm:$false
 		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Ethernet enabled, Wifi disabled"
 	}
 	catch{
@@ -54,8 +54,8 @@ catch {
 # ensure wifi
 if( (Get-NetAdapter -Name $wifiName).Status -eq "Disabled"){
 	try{
-		Disable-NetAdapter -Name $ethernetName -Confirm $false
-		Enable-NetAdapter -Name $wifiName -Confirm $false
+		Disable-NetAdapter -Name $ethernetName -Confirm:$false
+		Enable-NetAdapter -Name $wifiName -Confirm:$false
 		Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "Wifi enabled, Ethernet disabled"
 	}
 	catch{
@@ -67,7 +67,7 @@ if( (Get-NetAdapter -Name $wifiName).Status -eq "Disabled"){
 # do test
 try {
     # human readable format is harder to parse but has more useful information than csv
-    $rawResult = speedtest.exe -f human-readables
+    $rawResult = speedtest.exe -f human-readable
     Write-EventLog -LogName Application -Source "Speedtest" -EntryType Information -EventId 2 -Message "$wifiName speedtest complete. Result: $rawResult"
 }
 catch {
