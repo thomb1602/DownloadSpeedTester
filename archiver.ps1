@@ -7,7 +7,7 @@ $ethernetPath = "C:\Users\Tom\Desktop\speedtest\public\ResultsArchive\ethernet\o
 $indexFile =  "C:\Users\Tom\Desktop\speedtest\public\ResultsArchive\index.txt"
 
 Write-EventLog -LogName Application -Source "SpeedtestArchiver" -EntryType Information -EventId 2 -Message "Archiver started"
-$date = Get-Date -Format "yyyy-MM-ddTHHmmss"
+$date = Get-Date -Format "yyyy-MM-dd"
 
 # copy wifi to archive
 $newFilePath = $wifiPath.Replace('_', $date)
