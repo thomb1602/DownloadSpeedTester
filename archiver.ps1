@@ -19,11 +19,9 @@ $newFilePath = $ethernetPath.Replace('_', $date)
 Copy-Item -Path $ethernetFile -Destination $newFilePath 
 Write-EventLog -LogName Application -Source "SpeedtestArchiver" -EntryType Information -EventId 2 -Message "Copied to $newFilePath"
 
-
 # add filenames to index.txt
-$newFileName = $newFilePath.Substring(53);
+$newFileName = $newFilePath.Substring(62);
 Add-Content -Path $indexFile -Value $newFileName
-# TODO: add wifi and ethernet filenames to index files
 
 # empty files and re-add headers
 $headerRow = Get-Content -Path $wifiFile -TotalCount 1
