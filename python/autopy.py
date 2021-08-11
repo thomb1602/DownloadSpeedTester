@@ -25,7 +25,7 @@ def doSpeedTest(wifi):
         subprocess.run([f'netsh interface set interface {ethName} disable'], shell=True) # doesn't recognise command
     else:
         subprocess.run([f'netsh interface set interface {wifiName} disable'], shell=True)
-    subprocess.run([f'netsh interface set interface {adapterName} enable'], shell=True)
+    subprocess.run(f"netsh interface set interface {adapterName} enable", shell=True)
 
     while not isUp(adapterName):
         time.sleep(1)
