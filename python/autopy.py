@@ -2,32 +2,27 @@ import subprocess
 import psutil 
 import time
 from datetime import datetime
-import configparser
+import json
 
-# 
-ethName = "Ethernet"
-wifiName = "Wi-Fi"
-ethResultsPath = r'C:\git\repos\tom\DownloadSpeedTester\DownloadSpeedTester\ethernet.csv'
-wifiResultsPath = r'C:\git\repos\tom\DownloadSpeedTester\DownloadSpeedTester\wifi.csv'
-
-def doSpeedTest(wifi):
+def doSpeedTest(wifi, config):
 
     # setup adapter choice
-    adapterName = ethName
-    resultsPath = ethResultsPath
+    adapterName = config["EthAdapterName"] 
+    resultsPath = config["EthResultsPath"]
     if wifi:
-        adapterName = wifiName
-        resultsPath = wifiResultsPath
-        subprocess.run(f'netsh interface set interface {ethName} disable', shell=True)
-    else:
-        subprocess.run(f'netsh interface set interface {wifiName} disable', shell=True)
-    subprocess.run(f"netsh interface set interface {adapterName} enable", shell=True)
+        adapterName = config["WifiAdapterName"] 
+        resultsPath = config["WifiResultsPath"]
+        disableCmd = config["DisableCmd"].replace("adapterName", adapterName)
+        enableCmd = config["EnableCmd"].replace("adapterName", adapterName)
+    
+    subprocess.run(disableCmd, shell=True)
+    subprocess.run(enableCmd, shell=True)
 
     while not isUp(adapterName):
         time.sleep(1)
     
     # do test
-    rawResult = subprocess.run("speedtest.exe", capture_output=True)
+    rawResult = subprocess.run(config["SpeedtestCmd"], capture_output=True)
     upload = parseResult(rawResult.stdout, "Upload:")
     download = parseResult(rawResult.stdout, "Download:")
 
@@ -36,6 +31,7 @@ def doSpeedTest(wifi):
     result = f'"{now.strftime("%d/%m/%Y %H:%M:%S")}", "{download}", "{upload}"'
     with open(resultsPath, 'a') as resultsFile:
         resultsFile.write(result)
+        resultsFile.write("\\r\\n")
 
 
 def isUp(adapterName):
@@ -48,8 +44,13 @@ def parseResult(resultBytes, label):
     endIndex = startIndex + 10
     return result[startIndex:endIndex].strip()
 
+def getConfig(os):
+    path = r'C:\git\repos\tom\DownloadSpeedTester\DownloadSpeedTester\python\config.json'
+    with open(path, 'r') as j:
+        config = json.loads(j.read())
+        return config[os]
 
-config.read('config.ini')
-config = configparser.ConfigParser()
-
-# doSpeedTest(True)
+# main
+os = "Ideapad"  # or Inspiron
+config = getConfig(os)
+doSpeedTest(True, config)

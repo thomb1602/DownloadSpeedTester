@@ -1,0 +1,26 @@
+{
+    "Ideapad": 
+    {
+        "EthAdapterName" : "Ethernet_3",
+        "EthResultsPath" : "C:\\git\\repos\\tom\\DownloadSpeedTester\\DownloadSpeedTester\\python\\ethernet.csv",
+
+        "WifiAdapterName": "Wi-Fi",
+        "WifiResultsPath" : "C:\\git\\repos\\tom\\DownloadSpeedTester\\DownloadSpeedTester\\python\\wifi.csv",
+
+	"EnableCmd" : "netsh interface set interface adapterName enable",
+	"DisableCmd" : "netsh interface set interface adapterName disable",
+	"SpeedtestCmd" : "speedtest.exe"
+    },
+    "Inspiron": 
+    {
+        "EthAdapterName" : "",
+        "EthResultsPath" : "",
+
+        "WifiAdapterName": "",
+        "WifiResultsPath" : "",
+
+	"EnableCmd" : "",
+	"DisableCmd" : "",
+	"SpeedtestCmd" : ""
+    }
+}

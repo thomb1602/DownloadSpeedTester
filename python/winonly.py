@@ -5,21 +5,23 @@ from datetime import datetime
 import configparser
 
 # 
+ethName = "Ethernet"
+wifiName = "Wi-Fi"
+ethResultsPath = r'C:\git\repos\tom\DownloadSpeedTester\DownloadSpeedTester\ethernet.csv'
+wifiResultsPath = r'C:\git\repos\tom\DownloadSpeedTester\DownloadSpeedTester\wifi.csv'
 
-
-def doSpeedTest(wifi, config):
+def doSpeedTest(wifi):
 
     # setup adapter choice
-    adapterName = config.get('adapters', 'ethName')
-    resultsPath = config('paths', 'ethResultsPath')
+    adapterName = ethName
+    resultsPath = ethResultsPath
     if wifi:
-        adapterName = config['adapters']['wifiName']
-        resultsPath = config['paths']['wifiResultsPath']
-        disableCmd = config['commands']['disableAdapter'].replace("adapterName", adapterName)
-        enableCmd = config['commands']['enableAdapter'].replace("adapterName", adapterName)
-    
-    subprocess.run(disableCmd, shell=True)
-    subprocess.run(enableCmd, shell=True)
+        adapterName = wifiName
+        resultsPath = wifiResultsPath
+        subprocess.run(f'netsh interface set interface {ethName} disable', shell=True)
+    else:
+        subprocess.run(f'netsh interface set interface {wifiName} disable', shell=True)
+    subprocess.run(f"netsh interface set interface {adapterName} enable", shell=True)
 
     while not isUp(adapterName):
         time.sleep(1)
@@ -46,9 +48,8 @@ def parseResult(resultBytes, label):
     endIndex = startIndex + 10
     return result[startIndex:endIndex].strip()
 
-# main
+
+config.read('config.ini')
 config = configparser.ConfigParser()
-config.read('ideapad.txt')
 
-
-doSpeedTest(True, config)
+# doSpeedTest(True)
